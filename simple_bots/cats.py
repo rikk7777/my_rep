@@ -1,11 +1,13 @@
 import requests
 import time
+from environs import Env
 
-
+env = Env()
+env.read_env()
 API_URL = 'https://api.telegram.org/bot'
 API_CATS_URL = 'https://api.thecatapi.com/v1/images/search'
 API_DOG = 'https://random.dog/woof.json'
-BOT_TOKEN = '7284383193:AAHf6TnCgB0gW4wGIDYn79Vi7Iv2ukwOor4'
+BOT_TOKEN=env('BOT_TOKEN')
 ERROR_TEXT = 'Здесь должна была быть картинка с котиком :('
 TEXT = 'Я котик;)'
 

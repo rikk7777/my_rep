@@ -1,12 +1,15 @@
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart
+from environs import Env
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import (KeyboardButton, Message, KeyboardButtonPollType, ReplyKeyboardMarkup,
                            ReplyKeyboardRemove)
 
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота,
 # полученный у @BotFather
-BOT_TOKEN = '7284383193:AAHf6TnCgB0gW4wGIDYn79Vi7Iv2ukwOor4'
+env = Env()
+env.read_env()
+BOT_TOKEN=env('BOT_TOKEN')
 
 # Создаем объекты бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
