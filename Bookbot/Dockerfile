@@ -6,6 +6,8 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-WORKDIR Bookbot/
+WORKDIR /Bookbot
 
-CMD ['python', 'main.py']
+COPY ./Bookbot /Bookbot/
+
+CMD ['python', '/Bookbot/main.py']
