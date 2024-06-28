@@ -10,4 +10,4 @@ WORKDIR /Bookbot
 
 COPY ./Bookbot /Bookbot/
 
-CMD ['python', '/Bookbot/main.py']
+CMD ['python', 'main.py']
