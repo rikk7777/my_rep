@@ -28,7 +28,7 @@ async def main():
 
     # Инициализируем бот и диспетчер
     bot = Bot(
-        token=config.tg_bot.token,
+        token='7284383193:AAHf6TnCgB0gW4wGIDYn79Vi7Iv2ukwOor4',
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
     dp = Dispatcher()
