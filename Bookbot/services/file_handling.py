@@ -1,8 +1,8 @@
 import os
 import sys
 
-BOOK_PATH = 'book/Bredberi_Marsianskie-hroniki.txt'
-PAGE_SIZE = 1050
+BOOK_PATH = 'book/HarryPotter.txt'
+PAGE_SIZE = 1024
 
 book: dict[int, str] = {}
 
@@ -31,7 +31,7 @@ def _get_part_text(text: str, start: int, size: int) -> tuple[str, int]:
 
 # Функция, формирующая словарь книги
 def prepare_book(path: str) -> None:
-    with open(file=path, mode='r', encoding='utf-8') as file:
+    with open(file=path, mode='r') as file:
         text = file.read()
     start, page_number = 0, 1
     while start < len(text):

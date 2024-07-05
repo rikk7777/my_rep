@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from aiogram import F, Router
+from aiogram import F, Router, Bot
 from aiogram.filters import Command, CommandStart
 from aiogram.types import CallbackQuery, Message
 from database.database import user_dict_template, users_db
@@ -10,6 +10,14 @@ from keyboards.bookmarks_kb import (create_bookmarks_keyboard,
 from keyboards.pagination_kb import create_pagination_keyboard
 from lexicon.lexicon import LEXICON
 from services.file_handling import book
+from aiogram.types import FSInputFile
+from parsing.pars import get_pic
+from aiogram.types import (InlineKeyboardButton,
+                           InlineKeyboardMarkup, InputMediaAudio,
+                           InputMediaDocument, InputMediaPhoto,
+                           InputMediaVideo)
+import asyncio
+
 
 router = Router()
 
@@ -19,9 +27,11 @@ router = Router()
 # и отправлять ему приветственное сообщение
 @router.message(CommandStart())
 async def process_start_command(message: Message):
-    await message.answer(LEXICON[message.text])
+    picture = FSInputFile('images/x252.jpg')
+    await message.answer_photo(picture, LEXICON[message.text])
     if message.from_user.id not in users_db:
         users_db[message.from_user.id] = deepcopy(user_dict_template)
+
 
 
 # Этот хэндлер будет срабатывать на команду "/help"
@@ -31,20 +41,24 @@ async def process_help_command(message: Message):
     await message.answer(LEXICON[message.text])
 
 
+
 # Этот хэндлер будет срабатывать на команду "/beginning"
 # и отправлять пользователю первую страницу книги с кнопками пагинации
 @router.message(Command(commands='beginning'))
 async def process_beginning_command(message: Message):
     users_db[message.from_user.id]['page'] = 1
     text = book[users_db[message.from_user.id]['page']]
-    await message.answer(
-        text=text,
+    get_pic()
+    picture = FSInputFile('images/picture.jpg')
+    await message.answer_photo(
+        photo=picture,
+        caption=text,
         reply_markup=create_pagination_keyboard(
             'backward',
             f'{users_db[message.from_user.id]["page"]}/{len(book)}',
             'forward'
         )
-    )
+        )
 
 
 # Этот хэндлер будет срабатывать на команду "/continue"
@@ -53,14 +67,18 @@ async def process_beginning_command(message: Message):
 @router.message(Command(commands='continue'))
 async def process_continue_command(message: Message):
     text = book[users_db[message.from_user.id]['page']]
-    await message.answer(
-        text=text,
+    get_pic()
+    picture = FSInputFile('images/picture.jpg')
+    await message.answer_photo(
+        photo=picture,
+        caption=text,
         reply_markup=create_pagination_keyboard(
             'backward',
             f'{users_db[message.from_user.id]["page"]}/{len(book)}',
             'forward'
         )
     )
+
 
 
 # Этот хэндлер будет срабатывать на команду "/bookmarks"
@@ -82,12 +100,19 @@ async def process_bookmarks_command(message: Message):
 # Этот хэндлер будет срабатывать на нажатие инлайн-кнопки "вперед"
 # во время взаимодействия пользователя с сообщением-книгой
 @router.callback_query(F.data == 'forward')
-async def process_forward_press(callback: CallbackQuery):
+async def process_forward_press(callback: CallbackQuery, bot: Bot):
     if users_db[callback.from_user.id]['page'] < len(book):
         users_db[callback.from_user.id]['page'] += 1
         text = book[users_db[callback.from_user.id]['page']]
-        await callback.message.edit_text(
-            text=text,
+        get_pic()
+        picture = FSInputFile('images/picture.jpg')
+        await bot.edit_message_media(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            media=InputMediaPhoto(
+                media=picture,
+                caption=text
+            ),
             reply_markup=create_pagination_keyboard(
                 'backward',
                 f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
@@ -100,12 +125,19 @@ async def process_forward_press(callback: CallbackQuery):
 # Этот хэндлер будет срабатывать на нажатие инлайн-кнопки "назад"
 # во время взаимодействия пользователя с сообщением-книгой
 @router.callback_query(F.data == 'backward')
-async def process_backward_press(callback: CallbackQuery):
+async def process_backward_press(callback: CallbackQuery, bot: Bot):
     if users_db[callback.from_user.id]['page'] > 1:
         users_db[callback.from_user.id]['page'] -= 1
         text = book[users_db[callback.from_user.id]['page']]
-        await callback.message.edit_text(
-            text=text,
+        get_pic()
+        picture = FSInputFile('images/picture.jpg')
+        await bot.edit_message_media(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            media=InputMediaPhoto(
+                media=picture,
+                caption=text
+            ),
             reply_markup=create_pagination_keyboard(
                 'backward',
                 f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
@@ -128,11 +160,18 @@ async def process_page_press(callback: CallbackQuery):
 # Этот хэндлер будет срабатывать на нажатие инлайн-кнопки
 # с закладкой из списка закладок
 @router.callback_query(IsDigitCallbackData())
-async def process_bookmark_press(callback: CallbackQuery):
+async def process_bookmark_press(callback: CallbackQuery, bot: Bot):
     text = book[int(callback.data)]
     users_db[callback.from_user.id]['page'] = int(callback.data)
-    await callback.message.edit_text(
-        text=text,
+    get_pic()
+    picture = FSInputFile('images/picture.jpg')
+    await bot.edit_message_media(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+        media=InputMediaPhoto(
+        media=picture,
+        caption=text
+            ),
         reply_markup=create_pagination_keyboard(
             'backward',
             f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
